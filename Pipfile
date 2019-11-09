@@ -5,8 +5,16 @@ verify_ssl = true
 
 [dev-packages]
 twine = "*"
+flake8 = "*"
+black = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+flake8-docstrings = "*"
 
 [packages]
 
 [requires]
 python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
