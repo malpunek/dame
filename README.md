@@ -38,7 +38,7 @@ Great for working with numpy, pyTorch and more.
 ## Backlog:
 
 ### 1.0.0:
-  * [ ] - Dataset - compute items via Sources and Transforms
+  * [x] - Dataset - compute items via Sources and Transforms
   * [ ] - Dataset - validate Transforms
   * [ ] - Dataset - compute stage by stage, (assequence)
   * [ ] - Dataset - (_Stages) DAG computations
