@@ -39,7 +39,8 @@ Great for working with numpy, pyTorch and more.
 
 ### 1.0.0:
   * [ ] - Dataset - compute items via Sources and Transforms
-  * [ ] - Dataset - compute stage by stage
+  * [ ] - Dataset - validate Transforms
+  * [ ] - Dataset - compute stage by stage, (assequence)
   * [ ] - Dataset - (_Stages) DAG computations
   * [ ] - Dataset - Enable Storage & Caching
   * [ ] - Dataset - Enable Metadata Storage
