@@ -34,3 +34,31 @@ Great for working with numpy, pyTorch and more.
  - Few python dependencies
  - Integrate tqdm
  - DAG output
+
+## Backlog:
+
+### 1.0.0:
+  * [ ] - Dataset - compute items via Sources and Transforms
+  * [ ] - Dataset - compute stage by stage
+  * [ ] - Dataset - (_Stages) DAG computations
+  * [ ] - Dataset - Enable Storage & Caching
+  * [ ] - Dataset - Enable Metadata Storage
+  * [ ] - Storage - Parquet
+  * [ ] - Cache - Ring
+  * [ ] - Dataset - Compute by chunks for efficient cache
+  * [ ] - Dataset - Enable workers
+  * [ ] - Workers - MultiThreading / MultiProcessing
+  * [ ] - Storage - Redis
+  * [ ] - Dataset - Automatic Transform versioning based on source and attrs
+  * [ ] - Reducer - Scoring
+  * [ ] - Reducer - Ranking configurations
+  * [ ] - Reducer - Find optimal parameters
+
+### 2.0.0 Ideas:
+  * Easy reuse Dame transforms in Luigi/Dask/Apache Hadoop
+  * More built-in storage and cache options
+  * Built-in datasets like torchvision.MNIST etc
+  * Managing on disk datasets. Conversion between:
+    - Pytorch ImageFolder
+    - Images + csv
+    - Some Other
