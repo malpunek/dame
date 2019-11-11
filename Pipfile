@@ -4,12 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+tox = "*"
 twine = "*"
-flake8 = "*"
 black = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
-flake8-docstrings = "*"
+pytest = "*"
+docformatter = "*"
 
 [packages]
 

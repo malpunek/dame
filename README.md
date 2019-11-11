@@ -62,3 +62,12 @@ Great for working with numpy, pyTorch and more.
     - Pytorch ImageFolder
     - Images + csv
     - Some Other
+
+### Development:
+  * [ ] - tox - build
+  * [ ] - tox - publish
+  * [ ] - hosting docs on readthedocs
+  * [ ] - tox - publish docs
+  * [ ] - coverage
+  * [ ] - badges
+  
