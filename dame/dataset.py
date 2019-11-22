@@ -1,3 +1,21 @@
+from itertools import chain
+from collections import Counter
+
+
+def _get_all_keywords(obj):
+    """Gets all the keywords declared by a dataset.
+
+    Args:
+        obj (Dataset or cls): The dataset object or a subclass of a Dataset
+
+    Returns:
+        list(string): all keywords declared by obj.
+    """
+    keywords = [chain.from_iterable([t.provides for t in obj.transforms])]
+    keywords.append(getattr(obj.source_cls, "keyword", obj.default_source_keyword))
+    return keywords
+
+
 class Dataset:
     r"""The most important class in DAME.
 
@@ -13,12 +31,45 @@ class Dataset:
     """
     source_cls = None
     transforms = tuple()
+    default_source_keyword = "from_source"
+
+    def __init_subclass__(cls, **kwargs):
+        r"""Validates (roughly) the subclass's transforms and source
+
+        This method is called each time a subclass of dataset is created.
+        It ensures that the transforms have 'provides' attribute and
+        that no provided keywords overlap.
+
+        Args:
+            cls (Dataset subclass): The new subclass of Dataset
+        """
+        # TODO: Not sure if that's a good place to check.
+        # Maybe all validation should be done in __init__.
+        # The advantage of current approach is that you get the error sooner.
+        assert getattr(cls, "source_cls", None) is not None, (
+            "Dataset can't exist without a source. "
+            "If you know what you're doing try UnsafeDataset"
+        )
+        repeated_keywords = [
+            kw for kw, num in Counter(_get_all_keywords(cls)).most_common() if num > 1
+        ]
+        assert len(repeated_keywords) == 0, (
+            "Transforms' provided keywords must be unique. "
+            f"Violated by {repeated_keywords}"
+        )
+        super().__init_subclass__(**kwargs)
 
     def __init__(self):
         r"""Initiates the dataset."""
+        self.init_source()
         self.stages = self.make_transforms()
+
+    def init_source(self):
+        """Initializes the source attribute."""
         self.source = self.source_cls()
-        self.source.keyword = getattr(self.source, "keyword", "from_source")
+        self.source.keyword = getattr(
+            self.source, "keyword", self.default_source_keyword
+        )
 
     def __getitem__(self, idx):
         r"""Computes a single dataset element"""
@@ -56,7 +107,7 @@ class Dataset:
         """
         for stage in stages:
             kwargs = {
-                key: value for key, value in data.items() if key in stage.required
+                key: value for key, value in data.items() if key in stage.requires
             }
             new_data = stage.apply(**kwargs)
             data.update(new_data)

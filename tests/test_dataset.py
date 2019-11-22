@@ -1,15 +1,20 @@
+from pytest import raises
+
+
 from dame import Dataset
 
 
 class PlusOne:
-    required = "number"
+    requires = ("number", )
+    provides = ("p1", )
 
     def apply(self, *, number):
         return {"p1": number + 1}
 
 
 class PlusTwo:
-    required = "p1"
+    requires = ("p1", )
+    provides = ("p2", )
 
     def apply(self, *, p1):
         return {"p2": p1 + 1}
@@ -73,3 +78,17 @@ def test_assequence():
         assert list(data.assequence(of=set(["p1", "p2"]))) == [
             {"p1": d["p1"], "p2": d["p2"]} for d in full
         ]
+
+
+def test_safety_no_source():
+    with raises(AssertionError):
+
+        class NoSource(Dataset):
+            pass
+
+
+def test_safety_overlapping_keywords():
+    with raises(AssertionError):
+
+        class RepeatT(Dataset):
+            transforms = (PlusOne, PlusOne)
