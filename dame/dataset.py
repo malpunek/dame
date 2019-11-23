@@ -12,7 +12,7 @@ def _get_all_keywords(obj):
         list(string): all keywords declared by obj.
     """
     keywords = [chain.from_iterable([t.provides for t in obj.transforms])]
-    keywords.append(getattr(obj.source_cls, "keyword", obj.default_source_keyword))
+    keywords.append(getattr(obj.sources, "keyword", obj.default_source_keyword))
     return keywords
 
 
@@ -25,11 +25,11 @@ class Dataset:
     and transforms attributes.
 
     Attributes:
-        source_cls (Source_cls): As lightweight as possible data source
+        sources (Source_cls): As lightweight as possible data source
         transforms (Iterable[Transform_cls]): Processing of data items at element level
 
     """
-    source_cls = None
+    sources = None
     transforms = tuple()
     default_source_keyword = "from_source"
 
@@ -46,7 +46,7 @@ class Dataset:
         # TODO: Not sure if that's a good place to check.
         # Maybe all validation should be done in __init__.
         # The advantage of current approach is that you get the error sooner.
-        assert getattr(cls, "source_cls", None) is not None, (
+        assert getattr(cls, "sources", None) is not None, (
             "Dataset can't exist without a source. "
             "If you know what you're doing try UnsafeDataset"
         )
@@ -66,7 +66,7 @@ class Dataset:
 
     def init_source(self):
         """Initializes the source attribute."""
-        self.source = self.source_cls()
+        self.source = self.sources()
         self.source.keyword = getattr(
             self.source, "keyword", self.default_source_keyword
         )

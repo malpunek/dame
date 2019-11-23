@@ -41,10 +41,10 @@ class IterLessSource:
 
 
 class StandardDataset(Dataset):
-    source_cls = Source
+    sources = Source
     transforms = (PlusOne, PlusTwo)
 
 
 class IterLessDataset(Dataset):
-    source_cls = IterLessSource
+    sources = IterLessSource
     transforms = (PlusOne, PlusTwo)
