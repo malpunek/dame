@@ -1,52 +1,45 @@
 class Stages:
     """DAG functionality for Dataset's transforms."""
 
-    def __init__(self, source, transforms):
-        self.transforms = transforms
-        self.source = source
-        self.topsort()
-        self.make_instances()
+    def __init__(self, sources, transforms):
+        if not isinstance(sources, (list, tuple)):
+            sources = [sources]
+        stages = sources + list(transforms)
+        stages = self.topsort(stages)
+        self.stages = [self.make_instance(stage) for stage in stages]
 
-    def topsort(self):
-        """Sorts the transforms topologically."""
-        provider = {key: t for t in self.transforms for key in t.provides}
-        provider[self.source.keyword] = self.source
-
-        depends = {t: set() for t in self.transforms}
-        depends[self.source] = set()
-        for t in self.transforms:
-            for key in t.requires:
-                depends[provider[key]].add(t)
+    def topsort(self, stages):
+        """Sorts the transforms topologistagcally."""
+        provider = {key: s for s in stages for key in s.provides}
+        self.provider = provider
 
         # TODO: maybe instead of t.requires dame should just use t.apply.params
-        requires = {t: set(t.requires) for t in self.transforms}
-        requires[self.source] = set()
-        Q = [self.source]
+        depends = {s: set() for s in stages}
+        for s in stages:
+            for key in getattr(s, "requires", tuple()):
+                depends[provider[key]].add(s)
+
+        requires = {s: set(getattr(s, "requires", tuple())) for s in stages}
+        Q = [s for s, deps in requires.items() if len(deps) == 0]
         ordered = []
         while Q:
-            t = Q.pop()
-            ordered.append(t)
-            for dependant in depends[t]:
-                if t == self.source:
-                    provides = set([self.source.keyword])
-                else:
-                    provides = set(t.provides)
+            s = Q.pop()
+            ordered.append(s)
+            for dependant in depends[s]:
+                provides = set(s.provides)
                 requires[dependant] -= provides
                 if len(requires[dependant]) == 0:
                     Q.append(dependant)
-        assert (
-            len(ordered) == len(self.transforms) + 1
-        ), "Something is wrong with topsort!"
-        self.topsorted = ordered
-        self.provider = provider
+        assert len(ordered) == len(stages), "Something is wrong with topsort!"
+        return ordered
 
-    def make_instances(self):
-        """Instantionate the transforms.
+    def make_instance(self, transform):
+        """Instantionate the transform.
 
         Override this method if you want to provide parameters to
         transforms.
         """
-        self.stages = [t() for t in self.topsorted]
+        return transform()
 
     def __iter__(self):
         return iter(self.stages)

@@ -11,8 +11,12 @@ def _get_all_keywords(obj):
     Returns:
         list(string): all keywords declared by obj.
     """
-    keywords = [chain.from_iterable([t.provides for t in obj.transforms])]
-    keywords.append(getattr(obj.sources, "keyword", obj.default_source_keyword))
+    sources = obj.sources
+    if not isinstance(sources, (list, tuple)):
+        sources = [sources]
+    keywords = [
+        chain.from_iterable([t.provides for t in chain(obj.transforms, sources)])
+    ]
     return keywords
 
 
@@ -31,7 +35,6 @@ class Dataset:
     """
     sources = None
     transforms = tuple()
-    default_source_keyword = "from_source"
 
     def __init_subclass__(cls, **kwargs):
         r"""Validates (roughly) the subclass's transforms and source
@@ -66,23 +69,23 @@ class Dataset:
 
     def init_source(self):
         """Initializes the source attribute."""
-        self.source = self.sources()
-        self.source.keyword = getattr(
-            self.source, "keyword", self.default_source_keyword
-        )
+        if not isinstance(self.sources, (list, tuple)):
+            self.sources = [self.sources]
+        self.concrete_srcs = [src() for src in self.sources]
 
     def __getitem__(self, idx):
         r"""Computes a single dataset element"""
-        data = {self.source.keyword: self.source[idx]}
+        from_sources = [src[idx] for src in self.concrete_srcs]
+        data = dict(chain.from_iterable([fs.items() for fs in from_sources]))
         return self.compute(data, self.stages)
 
     def __len__(self):
-        return len(self.source)
+        return len(self.concrete_srcs[0])
 
     def __iter__(self):
         r"""Returns an iterator over the dataset with all transforms applied"""
-        for src_val in self.source:
-            data = {self.source.keyword: src_val}
+        for src_vals in zip(*[src for src in self.concrete_srcs]):
+            data = dict(chain.from_iterable([val.items() for val in src_vals]))
             yield self.compute(data, self.stages)
 
     def make_transforms(self):
