@@ -13,3 +13,7 @@
 
 # Tox envs
 /.tox/
+
+# Cache
+__pycache__
+.pytest_cache
