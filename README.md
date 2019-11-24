@@ -54,12 +54,18 @@ Great for working with numpy, pyTorch and more.
   * [ ] - Reducer - Scoring
   * [ ] - Reducer - Ranking configurations
   * [ ] - Reducer - Find optimal parameters
+  * [ ] - Storage - Joblib
+  * [ ] - Transform - Mapping Transform, Sequential transform
+  * [ ] - Dataset - Autodelete unrequired objects form memory (Autosequential)
+  * [ ] - Docs - Dame tutorial & more tests
+  * [ ] - TODOS - Solve left todos from the code
+
 
 ### 2.0.0 Ideas:
   * Easy reuse Dame transforms in Luigi/Dask/Apache Hadoop
   * More built-in storage and cache options
   * Built-in datasets like torchvision.MNIST etc
-  * Managing on disk datasets. Conversion between:
+  * Module for managing on disk datasets. GUI? Conversion between:
     - Pytorch ImageFolder
     - Images + csv
     - Some Other
