@@ -44,6 +44,9 @@ class Stages:
     def __iter__(self):
         return iter(self.stages)
 
+    def __getitem__(self, idx):
+        return self.stages[idx]
+
     def to(self, *keywords):
         result = set()
         Q = list([self.provider[kw] for kw in keywords])

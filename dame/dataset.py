@@ -1,6 +1,9 @@
 from itertools import chain
 from collections import Counter
 
+from .stages import Stages
+from .source import Source
+
 
 def _get_all_keywords(obj):
     """Gets all the keywords declared by a dataset.
@@ -35,6 +38,7 @@ class Dataset:
     """
     sources = None
     transforms = tuple()
+    idx_key = "_idx"
 
     def __init_subclass__(cls, **kwargs):
         r"""Validates (roughly) the subclass's transforms and source
@@ -64,29 +68,19 @@ class Dataset:
 
     def __init__(self):
         r"""Initiates the dataset."""
-        self.init_source()
-        self.stages = self.make_transforms()
-
-    def init_source(self):
-        """Initializes the source attribute."""
-        if not isinstance(self.sources, (list, tuple)):
-            self.sources = [self.sources]
-        self.concrete_srcs = [src() for src in self.sources]
+        self.stages = Stages(self.sources, self.transforms)
 
     def __getitem__(self, idx):
         r"""Computes a single dataset element"""
-        from_sources = [src[idx] for src in self.concrete_srcs]
-        data = dict(chain.from_iterable([fs.items() for fs in from_sources]))
-        return self.compute(data, self.stages)
+        return self.compute({self.idx_key: idx}, self.stages)
 
     def __len__(self):
-        return len(self.concrete_srcs[0])
+        return len(self.stages[0])
 
     def __iter__(self):
         r"""Returns an iterator over the dataset with all transforms applied"""
-        for src_vals in zip(*[src for src in self.concrete_srcs]):
-            data = dict(chain.from_iterable([val.items() for val in src_vals]))
-            yield self.compute(data, self.stages)
+        for idx in range(len(self)):
+            yield self.compute({self.idx_key: idx}, self.stages)
 
     def make_transforms(self):
         r"""Instantionates transforms.
@@ -109,11 +103,15 @@ class Dataset:
             dict(str -> Any): Computed element
         """
         for stage in stages:
-            kwargs = {
-                key: value for key, value in data.items() if key in stage.requires
-            }
-            new_data = stage.apply(**kwargs)
-            data.update(new_data)
+            if isinstance(stage, Source):
+                data.update(stage[data[self.idx_key]])
+            else:
+                kwargs = {
+                    key: value for key, value in data.items() if key in stage.requires
+                }
+                new_data = stage.apply(**kwargs)
+                data.update(new_data)
+        del data[self.idx_key]
         return data
 
     def compute_many(self, datas, stages):
@@ -133,6 +131,7 @@ class Dataset:
             of (str|set(str), optional): the keywords to keep in each element.
                 Defaults to None.
         """
+        # TODO allow computation stage by stage; not element by element
         if isinstance(of, str):
             of = set([of])
         datas = iter(self)

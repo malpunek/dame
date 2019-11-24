@@ -41,7 +41,7 @@ Great for working with numpy, pyTorch and more.
   * [x] - Dataset - compute items via Sources and Transforms
   * [x] - Dataset - compute stage by stage, (assequence)
   * [x] - Dataset - validate Transforms 
-  * [ ] - **WIP** Dataset - (_Stages) DAG computations
+  * [x] - Dataset - (_Stages) DAG computations
   * [ ] - Dataset - Enable Storage & Caching
   * [ ] - Dataset - Enable Metadata Storage
   * [ ] - Storage - Parquet
