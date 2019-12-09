@@ -42,23 +42,31 @@ Great for working with numpy, pyTorch and more.
   * [x] - Dataset - compute stage by stage, (assequence)
   * [x] - Dataset - validate Transforms 
   * [x] - Dataset - (_Stages) DAG computations
+  * [ ] - **WIP** - Dataset - Automatic Transform versioning based on source and attrs
+  * [ ] - **WIP** - Dataset - Enable Metadata Storage
   * [ ] - Dataset - Enable Storage & Caching
-  * [ ] - Dataset - Enable Metadata Storage
-  * [ ] - Storage - Parquet
+  * [ ] - Storage - Pickle
   * [ ] - Cache - Ring
   * [ ] - Dataset - Compute by chunks for efficient cache
   * [ ] - Dataset - Enable workers
   * [ ] - Workers - MultiThreading / MultiProcessing
-  * [ ] - Storage - Redis
-  * [ ] - Dataset - Automatic Transform versioning based on source and attrs
   * [ ] - Reducer - Scoring
   * [ ] - Reducer - Ranking configurations
   * [ ] - Reducer - Find optimal parameters
-  * [ ] - Storage - Joblib
   * [ ] - Transform - Mapping Transform, Sequential transform
   * [ ] - Dataset - Autodelete unrequired objects form memory (Autosequential)
   * [ ] - Docs - Dame tutorial & more tests
   * [ ] - TODOS - Solve left todos from the code
+
+
+#### Storage/Cache options:
+
+ * [ ] Pickle
+ * [ ] Joblib
+ * [ ] Redis
+ * [ ] Sqlite
+ * [ ] PyTables
+ * [ ] Parquet/Dask
 
 
 ### 2.0.0 Ideas:
