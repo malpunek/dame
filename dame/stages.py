@@ -4,9 +4,7 @@ class Stages:
     def __init__(self, sources, transforms):
         if not isinstance(sources, (list, tuple)):
             sources = [sources]
-        stages = sources + list(transforms)
-        stages = self.topsort(stages)
-        self.stages = [self.make_instance(stage) for stage in stages]
+        self.stages = self.topsort(sources + list(transforms))
 
     def topsort(self, stages):
         """Sorts the transforms topologistagcally."""
@@ -33,14 +31,6 @@ class Stages:
         assert len(ordered) == len(stages), "Something is wrong with topsort!"
         return ordered
 
-    def make_instance(self, transform):
-        """Instantionate the transform.
-
-        Override this method if you want to provide parameters to
-        transforms.
-        """
-        return transform()
-
     def __iter__(self):
         return iter(self.stages)
 
@@ -55,4 +45,4 @@ class Stages:
             if t not in result:
                 result.add(t)
                 Q.extend(set(self.provider[kw] for kw in getattr(t, "requires", [])))
-        return filter(lambda t: t.__class__ in result, self.stages)
+        return filter(lambda t: t in result, self.stages)
