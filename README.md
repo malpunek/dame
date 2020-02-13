@@ -43,17 +43,18 @@ Great for working with numpy, pyTorch and more.
   * [x] - Dataset - validate Transforms
   * [x] - Dataset - (_Stages) DAG computations
   * [x] - Dataset - Automatic (Transform) versioning based on source and attrs
-  * [ ] - **WIP** - Dataset - Enable Metadata Storage
+  * [ ] - **WIP** - Workers - MultiThreading / MultiProcessing
+  * [ ] - Dataset - Enable Metadata Storage
   * [ ] - Dataset - Enable Storage & Caching
-  * [ ] - Storage - Pickle
+  * [ ] - Storage - SQLite
   * [ ] - Cache - Ring
   * [ ] - Dataset - Compute by chunks for efficient cache
   * [ ] - Dataset - Enable workers
-  * [ ] - Workers - MultiThreading / MultiProcessing
   * [ ] - Reducer - Scoring
   * [ ] - Reducer - Ranking configurations
   * [ ] - Reducer - Find optimal parameters
   * [ ] - Transform - Mapping Transform, Sequential transform
+  * [ ] - Transform - deletes should be available apart from provides and requires
   * [ ] - Dataset - Autodelete unrequired objects form memory (Autosequential)
   * [ ] - Docs - Dame tutorial & more tests
   * [ ] - TODOS - Solve left todos from the code
