@@ -18,8 +18,20 @@ class PlusTwo:
         return {"p2": p1 + 1}
 
 
-class ThreeNums(Source):
+class PlusXN:
 
+    requires = ("number",)
+    provides = ("pxn",)
+
+    def __init__(self, x, n=0):
+        self.x = x
+        self.n = n
+
+    def apply(self, *, number):
+        return {"pxn": number + self.x ** self.n}
+
+
+class ThreeNums(Source):
     provides = ("number",)
 
     def __getitem__(self, idx):
@@ -30,5 +42,5 @@ class ThreeNums(Source):
 
 
 class StandardDataset(Dataset):
-    sources = ThreeNums
+    source = ThreeNums
     transforms = (PlusOne, PlusTwo)
