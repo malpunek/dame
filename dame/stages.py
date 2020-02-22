@@ -1,3 +1,6 @@
+from inspect import getfullargspec
+
+
 class Stages:
     """DAG functionality for Dataset's transforms."""
 
@@ -5,21 +8,22 @@ class Stages:
         self.stages = self.topsort(source, list(transforms))
         self.source = source
 
+    def get_requirements(self, transform):
+        return getfullargspec(transform.apply)[4]
+
     def topsort(self, source, transforms):
         """Sorts the transforms topologistagcally."""
         provider = {key: t for t in transforms for key in t.provides}
         self.provider = provider
 
-        # TODO: maybe instead of t.requires dame should just use t.apply.params
         dependants = {t: set() for t in transforms}
         for t in transforms:
-            for key in getattr(t, "requires", tuple()):
+            for key in self.get_requirements(t):
                 if key not in getattr(source, "provides", tuple()):
                     dependants[provider[key]].add(t)
 
         requires = {
-            t: set(getattr(t, "requires", tuple())) - set(source.provides)
-            for t in transforms
+            t: set(self.get_requirements(t)) - set(source.provides) for t in transforms
         }
         Q = [t for t, deps in requires.items() if len(deps) == 0]
         ordered = []
@@ -50,7 +54,7 @@ class Stages:
                 Q.extend(
                     set(
                         self.provider[kw]
-                        for kw in getattr(t, "requires", [])
+                        for kw in self.get_requirements(t)
                         if kw not in getattr(self.source, "provides", tuple())
                     )
                 )

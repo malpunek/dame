@@ -1,9 +1,12 @@
 from dame.worker import SequentialWorker
-
+from dame.stages import Stages
 from .test_classes import ThreeNums, PlusOne, PlusTwo, PlusXN
 
 
-class TestStages:
+class TestStages(Stages):
+    def __init__(self):
+        pass
+
     def to(self, keyword):
         if keyword == "p1":
             return iter([PlusOne])

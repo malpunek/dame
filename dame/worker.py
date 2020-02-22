@@ -85,7 +85,11 @@ class SequentialWorker:
         Returns:
             dict: updated data
         """
-        kwargs = {key: value for key, value in data.items() if key in stage.requires}
+        kwargs = {
+            key: value
+            for key, value in data.items()
+            if key in self.stages.get_requirements(stage)
+        }
         new_data = stage.apply(**kwargs)
         data.update(new_data)
         return data
@@ -105,7 +109,8 @@ class PoolJoiningIterator:
 
 
 class WorkManager:
-    """Manages the spawning of workers in separate processes"""
+    """Manages the spawning of workers in separate processes."""
+
     def __init__(self, source, transforms, context, n_processes=None):
         self.n_processes = n_processes
         self.source = source

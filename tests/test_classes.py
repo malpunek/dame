@@ -3,7 +3,6 @@ from dame.source import Source
 
 
 class PlusOne:
-    requires = ("number",)
     provides = ("p1",)
 
     def apply(self, *, number):
@@ -11,7 +10,6 @@ class PlusOne:
 
 
 class PlusTwo:
-    requires = ("p1",)
     provides = ("p2",)
 
     def apply(self, *, p1):
@@ -20,7 +18,6 @@ class PlusTwo:
 
 class PlusXN:
 
-    requires = ("number",)
     provides = ("pxn",)
 
     def __init__(self, x, n=0):
