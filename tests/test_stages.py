@@ -6,8 +6,7 @@ from .test_classes import PlusOne, PlusTwo, ThreeNums
 def test_dag():
     stages = Stages(ThreeNums, (PlusTwo, PlusOne))
     assert list(iter(stages)) == [
-        ThreeNums,
         PlusOne,
         PlusTwo,
     ]
-    assert list(stages.to("p1")) == [ThreeNums, PlusOne]
+    assert list(stages.to("p1")) == [PlusOne]
