@@ -37,9 +37,15 @@ def test_safety_no_source():
         class NoSource(Dataset):
             pass
 
+        for i in NoSource():
+            pass
+
 
 def test_safety_overlapping_keywords():
     with raises(AssertionError):
 
         class RepeatT(Dataset):
             transforms = (PlusOne, PlusOne)
+
+        for i in RepeatT():
+            pass
