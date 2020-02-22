@@ -44,17 +44,17 @@ Great for working with numpy, pyTorch and more.
   * [x] - Dataset - (_Stages) DAG computations
   * [x] - Dataset - Automatic (Transform) versioning based on source and attrs
   * [x] - Workers - MultiThreading / MultiProcessing
+  * [x] - Dataset - Building context for transforms
+  * [ ] - Reducer - Scoring
+  * [ ] - Reducer - Ranking configurations, Find optimal parameters
+  * [ ] - Stages - Make an actual DAG instead of topsort
   * [ ] - Dataset - Enable Metadata Storage
   * [ ] - Dataset - Enable Storage & Caching
   * [ ] - Storage - SQLite
   * [ ] - Cache - Ring
   * [ ] - Dataset - Compute by chunks for efficient cache
-  * [ ] - Dataset - Enable workers
-  * [ ] - Reducer - Scoring
-  * [ ] - Reducer - Ranking configurations
-  * [ ] - Reducer - Find optimal parameters
   * [ ] - Transform - Mapping Transform, Sequential transform
-  * [ ] - Transform - deletes should be available apart from provides and requires
+  * [ ] - Transform - Delete intermediate result
   * [ ] - Dataset - Autodelete unrequired objects form memory (Autosequential)
   * [ ] - Docs - Dame tutorial & more tests
   * [ ] - TODOS - Solve left todos from the code

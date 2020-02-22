@@ -3,7 +3,7 @@ from dame.stages import Stages
 from .test_classes import ThreeNums, PlusOne, PlusTwo, PlusXN
 
 
-class TestStages(Stages):
+class MockStages(Stages):
     def __init__(self):
         pass
 
@@ -21,7 +21,7 @@ class TestStages(Stages):
 
 
 def test_computations():
-    stages = TestStages()
+    stages = MockStages()
     source = ThreeNums()
     context = {PlusXN.__name__: {"args": [10], "kwargs": {"n": 3}}}
     worker = SequentialWorker(stages, context)

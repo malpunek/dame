@@ -23,7 +23,7 @@ class Dataset:
 
     @property
     def manager(self):
-        if not hasattr(self, "_manager"):
+        if getattr(self, "_manager", None) is None:
             if not hasattr(self, "_validated"):
                 self.validate()
                 self._validated = True
@@ -58,6 +58,18 @@ class Dataset:
         return map(
             lambda data: {key: value for key, value in data.items() if key in of}, self
         )
+
+    def set_arguments_for(self, transform, *args, **kwargs):
+        r"""Provide arguments to use when creating transform instances.
+        Dame will use transform(*args, **kwargs) to get an instance.
+
+        Args:
+            transform (transform class): Transform class for which params should be registered
+            *args (any): list of positional args
+            **kwargs (any): list of keyword args
+        """
+        ctx = {"args": args, "kwargs": kwargs}
+        self.context[transform.__name__] = ctx
 
     def validate(self):
         r"""Validates (roughly) the subclass's transforms and source

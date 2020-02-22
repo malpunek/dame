@@ -2,7 +2,12 @@ from pytest import raises
 
 from dame import Dataset
 
-from .test_classes import StandardDataset, PlusOne
+from .test_classes import ThreeNums, PlusOne, PlusTwo, PlusXN
+
+
+class StandardDataset(Dataset):
+    source = ThreeNums
+    transforms = (PlusOne, PlusTwo)
 
 
 def test_gets_item():
@@ -49,3 +54,15 @@ def test_safety_overlapping_keywords():
 
         for i in RepeatT():
             pass
+
+
+class OtherDataset(StandardDataset):
+    transforms = (PlusOne, PlusXN)
+
+
+def test_right_args():
+    data = OtherDataset()
+    data.set_arguments_for(PlusXN, 2, n=10)
+    assert data[0] == {"number": 0, "p1": 1, "pxn": 1024}
+    data.set_arguments_for(PlusXN, 2, n=9)
+    assert data[0] == {"number": 0, "p1": 1, "pxn": 512}

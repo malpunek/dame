@@ -1,4 +1,3 @@
-from dame import Dataset
 from dame.source import Source
 
 
@@ -36,8 +35,3 @@ class ThreeNums(Source):
 
     def __len__(self):
         return 3
-
-
-class StandardDataset(Dataset):
-    source = ThreeNums
-    transforms = (PlusOne, PlusTwo)
