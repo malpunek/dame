@@ -1,3 +1,8 @@
+from multiprocessing import Pool
+
+from .stages import Stages
+
+
 def make_stage_with_context(stage_cls, context):
     if stage_cls.__name__ in context:
         ctx = context[stage_cls.__name__]
@@ -86,3 +91,47 @@ class SequentialWorker:
         return data
 
 
+class PoolJoiningIterator:
+    def __init__(self, base_iter, pool):
+        self.it = base_iter
+        self.pool = pool
+
+    def __iter__(self):
+        try:
+            yield from self.it
+        finally:
+            self.pool.close()
+            self.pool.join()
+
+
+class WorkManager:
+    """Manages the spawning of workers in separate processes"""
+    def __init__(self, source, transforms, context, n_processes=None):
+        self.n_processes = n_processes
+        self.source = source
+        self.context = context
+        self.stages = Stages(self.source, transforms)
+
+    @property
+    def source_instance(self):
+        if not hasattr(self, "_source_instance"):
+            self._source_instance = make_stage_with_context(self.source, self.context)
+        return self._source_instance
+
+    def fast_compute(self):
+        pool = Pool(
+            processes=self.n_processes,
+            initializer=SequentialWorker.make_instance,
+            initargs=(self.stages, self.context),
+        )
+
+        res_it = pool.imap(
+            SequentialWorker.instance_compute_full,
+            (data for data in self.source_instance),
+        )
+
+        return iter(PoolJoiningIterator(res_it, pool))
+
+    def compute_one(self, idx):
+        worker = SequentialWorker(self.stages, self.context)
+        return worker.compute_full(self.source_instance[idx])
