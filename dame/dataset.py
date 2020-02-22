@@ -1,8 +1,7 @@
 from itertools import chain
 from collections import Counter
 
-from .stages import Stages
-from .source import Source
+from .worker import WorkManager
 
 
 def _get_all_keywords(obj):
@@ -14,9 +13,7 @@ def _get_all_keywords(obj):
     Returns:
         list(string): all keywords declared by obj.
     """
-    sources = obj.sources
-    if not isinstance(sources, (list, tuple)):
-        sources = [sources]
+    sources = [obj.source]
     keywords = [
         chain.from_iterable([t.provides for t in chain(obj.transforms, sources)])
     ]
@@ -32,13 +29,13 @@ class Dataset:
     and transforms attributes.
 
     Attributes:
-        sources (Source_cls): As lightweight as possible data source
+        source (Source_cls): As lightweight as possible data source
         transforms (Iterable[Transform_cls]): Processing of data items at element level
 
     """
-    sources = None
+    source = None
     transforms = tuple()
-    idx_key = "_idx"
+    context = {}
 
     def __init_subclass__(cls, **kwargs):
         r"""Validates (roughly) the subclass's transforms and source
@@ -53,10 +50,11 @@ class Dataset:
         # TODO: Not sure if that's a good place to check.
         # Maybe all validation should be done in __init__.
         # The advantage of current approach is that you get the error sooner.
-        assert getattr(cls, "sources", None) is not None, (
-            "Dataset can't exist without a source. "
-            "If you know what you're doing try UnsafeDataset"
-        )
+        # TODO: this is stupid - somebody might want to provide some more generic
+        # functionality to Dataset
+        assert (
+            getattr(cls, "source", None) is not None
+        ), "Dataset can't exist without a source. "
         repeated_keywords = [
             kw for kw, num in Counter(_get_all_keywords(cls)).most_common() if num > 1
         ]
@@ -66,63 +64,22 @@ class Dataset:
         )
         super().__init_subclass__(**kwargs)
 
-    def __init__(self):
-        r"""Initiates the dataset."""
-        self.stages = Stages(self.sources, self.transforms)
+    @property
+    def manager(self):
+        if not hasattr(self, "_manager"):
+            self._manager = WorkManager(self.source, self.transforms, self.context)
+        return self._manager
 
     def __getitem__(self, idx):
         r"""Computes a single dataset element"""
-        return self.compute({self.idx_key: idx}, self.stages)
+        return self.manager.compute_one(idx)
 
     def __len__(self):
-        return len(self.stages[0])
+        return len(self.manager.source_instance)
 
     def __iter__(self):
         r"""Returns an iterator over the dataset with all transforms applied"""
-        for idx in range(len(self)):
-            yield self.compute({self.idx_key: idx}, self.stages)
-
-    def make_transforms(self):
-        r"""Instantionates transforms.
-
-        Override if you want to pass custom keywords to transform
-
-        Returns:
-            Iterable[Transform]: Sequence of instances of available transfoms.
-        """
-        return [transform_cls() for transform_cls in self.transforms]
-
-    def compute(self, data, stages):
-        r"""Computes an element by applying stages to data.
-
-        Args:
-            data (dict(str -> Any)): the initial data.
-            stages (Iterable[Transform]): the stages to apply over data.
-
-        Returns:
-            dict(str -> Any): Computed element
-        """
-        for stage in stages:
-            if isinstance(stage, Source):
-                data.update(stage[data[self.idx_key]])
-            else:
-                kwargs = {
-                    key: value for key, value in data.items() if key in stage.requires
-                }
-                new_data = stage.apply(**kwargs)
-                data.update(new_data)
-        del data[self.idx_key]
-        return data
-
-    def compute_many(self, datas, stages):
-        r"""Applies compute to a sequence of datas.
-
-        Args:
-            datas (Iterable[dict(str -> Any)]): An iterable of initial datas.
-            stages (Iterable[Transform]): the stages to apply over data.
-        """
-        for data in datas:
-            yield self.compute(data, stages)
+        return self.manager.fast_compute()
 
     def assequence(self, of=None):
         r"""Returns a sequence of `{key: computed_value for key in of}`
@@ -131,12 +88,8 @@ class Dataset:
             of (str|set(str), optional): the keywords to keep in each element.
                 Defaults to None.
         """
-        # TODO allow computation stage by stage; not element by element
-        if isinstance(of, str):
-            of = set([of])
-        datas = iter(self)
         if of is None:
-            return datas
-        return (
-            {key: value for key, value in data.items() if key in of} for data in datas
+            return iter(self)
+        return map(
+            lambda data: {key: value for key, value in data.items() if key in of}, self
         )

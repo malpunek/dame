@@ -43,7 +43,7 @@ Great for working with numpy, pyTorch and more.
   * [x] - Dataset - validate Transforms
   * [x] - Dataset - (_Stages) DAG computations
   * [x] - Dataset - Automatic (Transform) versioning based on source and attrs
-  * [ ] - **WIP** - Workers - MultiThreading / MultiProcessing
+  * [x] - Workers - MultiThreading / MultiProcessing
   * [ ] - Dataset - Enable Metadata Storage
   * [ ] - Dataset - Enable Storage & Caching
   * [ ] - Storage - SQLite
