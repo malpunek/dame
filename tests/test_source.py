@@ -4,7 +4,7 @@ from dame.source import SourceWrap
 class MockSource:
     def __iter__(self):
         for i in range(10):
-            yield {"what": i+10}
+            yield {"what": i + 10}
 
 
 def test_hack_getitem():

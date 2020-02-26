@@ -1,6 +1,7 @@
 from multiprocessing import Pool
 
 from .stages import Stages
+from .source import SourceWrap
 
 
 def make_stage_with_context(stage_cls, context):
@@ -123,6 +124,12 @@ class WorkManager:
             self._source_instance = make_stage_with_context(self.source, self.context)
         return self._source_instance
 
+    @property
+    def wrapped_source_instance(self):
+        if not hasattr(self, "_wrapped_source_instance"):
+            self._wrapped_source_instance = SourceWrap(self.source_instance)
+        return self._wrapped_source_instance
+
     def fast_compute(self):
         pool = Pool(
             processes=self.n_processes,
@@ -132,11 +139,11 @@ class WorkManager:
 
         res_it = pool.imap(
             SequentialWorker.instance_compute_full,
-            (data for data in self.source_instance),
+            (data for data in self.wrapped_source_instance),
         )
 
         return iter(PoolJoiningIterator(res_it, pool))
 
     def compute_one(self, idx):
         worker = SequentialWorker(self.stages, self.context)
-        return worker.compute_full(self.source_instance[idx])
+        return worker.compute_full(self.wrapped_source_instance[idx])

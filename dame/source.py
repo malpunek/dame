@@ -5,6 +5,7 @@ class SourceWrap:
         2) __getitem__ provided for sources that only contain __iter__.
             It's fast when accesing elements in increasing order.
     """
+
     def __init__(self, source_instance):
         self.instance = source_instance
         self._hack_iter = None
