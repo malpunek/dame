@@ -1,6 +1,3 @@
-from dame.source import Source
-
-
 class PlusOne:
     provides = ("p1",)
 
@@ -27,10 +24,12 @@ class PlusXN:
         return {"pxn": number + self.x ** self.n}
 
 
-class ThreeNums(Source):
+class ThreeNums:
     provides = ("number",)
 
     def __getitem__(self, idx):
+        if idx > 2 or idx < 0:
+            raise IndexError
         return {"number": idx}
 
     def __len__(self):

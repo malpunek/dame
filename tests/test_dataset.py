@@ -13,7 +13,7 @@ class StandardDataset(Dataset):
 def test_gets_item():
     data = StandardDataset()
     assert data[0] == {"number": 0, "p1": 1, "p2": 2}
-    assert data[103] == {"number": 103, "p1": 104, "p2": 105}
+    assert data[2] == {"number": 2, "p1": 3, "p2": 4}
 
 
 def test_len():
