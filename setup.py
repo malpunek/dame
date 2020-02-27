@@ -21,4 +21,5 @@ setuptools.setup(
         "Topic :: Software Development"
     ],
     python_requires='>=3.6',
+    install_requires=['numpy', 'peewee>=3'],
 )

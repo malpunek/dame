@@ -1,18 +1,21 @@
-class PlusOne:
+from dame.versionable import Versionable
+
+
+class PlusOne(Versionable):
     provides = ("p1",)
 
     def apply(self, *, number):
         return {"p1": number + 1}
 
 
-class PlusTwo:
+class PlusTwo(Versionable):
     provides = ("p2",)
 
     def apply(self, *, p1):
         return {"p2": p1 + 1}
 
 
-class PlusXN:
+class PlusXN(Versionable):
 
     provides = ("pxn",)
 

@@ -45,12 +45,11 @@ Great for working with numpy, pyTorch and more.
   * [x] - Dataset - Automatic (Transform) versioning based on source and attrs
   * [x] - Workers - MultiThreading / MultiProcessing
   * [x] - Dataset - Building context for transforms
+  * [x] - Storage - SQLite
+  * [ ] - Dataset - Enable Storage & Caching
   * [ ] - Reducer - Scoring
   * [ ] - Reducer - Ranking configurations, Find optimal parameters
   * [ ] - Stages - Make an actual DAG instead of topsort
-  * [ ] - Dataset - Enable Metadata Storage
-  * [ ] - Dataset - Enable Storage & Caching
-  * [ ] - Storage - SQLite
   * [ ] - Cache - Ring
   * [ ] - Dataset - Compute by chunks for efficient cache
   * [ ] - Transform - Mapping Transform, Sequential transform
