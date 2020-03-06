@@ -46,7 +46,7 @@ Great for working with numpy, pyTorch and more.
   * [x] - Workers - MultiThreading / MultiProcessing
   * [x] - Dataset - Building context for transforms
   * [x] - Storage - SQLite
-  * [ ] - Dataset - Enable Storage & Caching
+  * [ ] - **WIP** - Dataset - Enable Storage & Caching
   * [ ] - Reducer - Scoring
   * [ ] - Reducer - Ranking configurations, Find optimal parameters
   * [ ] - Stages - Make an actual DAG instead of topsort

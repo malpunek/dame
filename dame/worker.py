@@ -1,4 +1,5 @@
 from multiprocessing import Pool
+from multiprocessing.util import Finalize
 
 from .stages import Stages
 from .source import SourceWrap
@@ -15,12 +16,41 @@ class SequentialWorker:
     r"""Performs all the necessary computations in a current process"""
 
     @staticmethod
-    def make_instance(stages, context):
-        SequentialWorker.instance = SequentialWorker(stages, context)
+    def make_instance(stages, context, store):
+        SequentialWorker.instance = SequentialWorker(
+            stages, context, global_store=store
+        )
+        SequentialWorker.instance.__enter__()
+        # https://stackoverflow.com/a/24724452
+        Finalize(
+            SequentialWorker.instance,
+            SequentialWorker.instance.__exit__,
+            args=(None, None, None),
+            exitpriority=10,
+        )
 
-    def __init__(self, stages, context):
+    def __init__(self, stages, context, global_store=None):
         self.stages = stages
         self.context = context
+        if global_store is not None:
+            ctx = context.get(global_store.__name__, {})
+            kwargs = {
+                "db_args": ctx.get("db_args", []),
+                "db_kwargs": ctx.get("db_kwargs", {}),
+            }
+            db_cls = ctx.get("db_cls", None)
+            if db_cls is not None:
+                kwargs["db_cls"] = db_cls
+            self.store = global_store(self.stages, **kwargs)
+
+    def __enter__(self):
+        if hasattr(self, "store"):
+            self.store.open()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if hasattr(self, "store"):
+            self.store.close()
 
     @property
     def stage_instances(self):
@@ -76,6 +106,16 @@ class SequentialWorker:
     def instance_compute_stage(d, s):
         return SequentialWorker.instance.compute_stage(d, s)
 
+    def load_from_store(self, idx, transform):
+        if not hasattr(self, "store"):
+            return None
+        return self.store.load(idx, transform)
+
+    def save_to_store(self, idx, transform, data):
+        if not hasattr(self, "store"):
+            return
+        self.store.save(idx, transform, data)
+
     def compute_stage(self, data, stage):
         r"""Computes a single stage
         
@@ -86,6 +126,11 @@ class SequentialWorker:
         Returns:
             dict: updated data
         """
+        new_data = self.load_from_store(data["idx"], stage)
+        if new_data is not None:
+            data.update(new_data)
+            return data
+
         kwargs = {
             key: value
             for key, value in data.items()
@@ -93,6 +138,7 @@ class SequentialWorker:
         }
         new_data = stage.apply(**kwargs)
         data.update(new_data)
+        self.save_to_store(data["idx"], stage, new_data)
         return data
 
 
@@ -112,17 +158,12 @@ class PoolJoiningIterator:
 class WorkManager:
     """Manages the spawning of workers in separate processes."""
 
-    def __init__(self, source, transforms, context, n_processes=None):
+    def __init__(self, source, transforms, context, n_processes=None, store=None):
         self.n_processes = n_processes
-        self.source = source
+        self.source_instance = source
         self.context = context
-        self.stages = Stages(self.source, transforms)
-
-    @property
-    def source_instance(self):
-        if not hasattr(self, "_source_instance"):
-            self._source_instance = make_stage_with_context(self.source, self.context)
-        return self._source_instance
+        self.stages = Stages(source, transforms)
+        self.store = store
 
     @property
     def wrapped_source_instance(self):
@@ -134,7 +175,7 @@ class WorkManager:
         pool = Pool(
             processes=self.n_processes,
             initializer=SequentialWorker.make_instance,
-            initargs=(self.stages, self.context),
+            initargs=(self.stages, self.context, self.store),
         )
 
         res_it = pool.imap(
@@ -145,5 +186,5 @@ class WorkManager:
         return iter(PoolJoiningIterator(res_it, pool))
 
     def compute_one(self, idx):
-        worker = SequentialWorker(self.stages, self.context)
-        return worker.compute_full(self.wrapped_source_instance[idx])
+        with SequentialWorker(self.stages, self.context, global_store=self.store) as w:
+            return w.compute_full(self.wrapped_source_instance[idx])

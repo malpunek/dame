@@ -10,6 +10,7 @@ from peewee import (
     DateTimeField,
     BlobField,
     IntegerField,
+    SqliteDatabase,
 )
 
 
@@ -32,11 +33,19 @@ class NumpyPlaceholder:
 
 
 class PeeWeeStore:
-    def __init__(self, db, transforms):
+    def __init__(self, transforms, db_cls=SqliteDatabase, db_args=(), db_kwargs=None):
         self.transforms = transforms
-        self.db = db
+        self.db_cls, self.db_args = db_cls, db_args
+        self.db_kwargs = db_kwargs or dict({"pragmas": {"foreign_keys": 1}})
+
+    def open(self, *args, **kwargs):
+        if not args:
+            args = self.db_args
+        if not kwargs:
+            kwargs = self.db_kwargs
+        self.db = self.db_cls(*args, **kwargs)
         # Models in relation are automatically bound
-        TransformModel.bind(db)
+        TransformModel.bind(self.db)
         self.db.connect()
         self.db.create_tables([TransformModel, Result])
 
@@ -85,15 +94,12 @@ class PeeWeeStore:
                 data[key] = np.load(np_data_blob)
         return data
 
-    def save(self, data, transform):
+    def save(self, idx, transform, data):
         data = dict(data)
         out, np_out = self.get_blobs(*self.separate_numpy_data(data))
         trans = self.transform_ids[transform.__class__.__name__]
         res = Result(
-            origin_id=trans,
-            dataset_index=data["idx"],
-            pickled_data=out,
-            numpy_data=np_out,
+            origin_id=trans, dataset_index=idx, pickled_data=out, numpy_data=np_out,
         )
         res.save()
 

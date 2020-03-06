@@ -3,7 +3,6 @@ from tempfile import TemporaryDirectory
 from io import BytesIO
 import pickle
 
-from peewee import SqliteDatabase
 import numpy as np
 
 from dame.storage import PeeWeeStore, NumpyPlaceholder
@@ -12,10 +11,9 @@ from .test_classes import PlusXN
 
 
 @contextmanager
-def test_db():
+def tmp_db_path():
     with TemporaryDirectory() as tmpdir:
-        db_path = f"{tmpdir}/db.sqlite3"
-        yield SqliteDatabase(db_path, pragmas={"foreign_keys": 1})
+        yield f"{tmpdir}/db.sqlite3"
 
 
 def test_separate_numpy_data():
@@ -50,12 +48,14 @@ def test_unpack_blobs():
 
 
 def test_storage():
-    with test_db() as tmp_db:
+    with tmp_db_path() as db_path:
         transform = PlusXN(3)
-        store = PeeWeeStore(tmp_db, (transform,))
-        data = {"idx": 0, "random": np.random.rand(5), "foo": "bar"}
-        store.save(data, transform)
+        store = PeeWeeStore((transform,))
+        store.open(db_path, pragmas={"foreign_keys": 1})
+        data = {"random": np.random.rand(5), "foo": "bar"}
+        store.save(0, transform, data)
         recv = store.load(0, transform)
+        store.close()
         assert np.all(recv["random"] == data["random"])
         del recv["random"]
         del data["random"]

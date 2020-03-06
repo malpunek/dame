@@ -6,7 +6,7 @@ from .test_classes import ThreeNums, PlusOne, PlusTwo, PlusXN
 
 
 class StandardDataset(Dataset):
-    source = ThreeNums
+    source = ThreeNums()
     transforms = (PlusOne, PlusTwo)
 
 

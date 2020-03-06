@@ -32,6 +32,7 @@ class Dataset:
                 self.transforms,
                 self.context,
                 n_processes=getattr(self, "n_processes", None),
+                store=getattr(self, "store", None)
             )
         return self._manager
 
@@ -64,7 +65,7 @@ class Dataset:
         Dame will use transform(*args, **kwargs) to get an instance.
 
         Args:
-            transform (transform class): Transform class for which params should be registered
+            transform (transform class): Transform for which params will be registered
             *args (any): list of positional args
             **kwargs (any): list of keyword args
         """
